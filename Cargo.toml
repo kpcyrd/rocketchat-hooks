@@ -1,7 +1,7 @@
 [package]
 name = "rocketchat-hooks"
 version = "0.1.0"
-description = "post to rocketchat hooks"
+description = "Post to rocketchat hooks"
 authors = ["kpcyrd <git@rxv.cc>"]
 license = "MIT"
 repository = "https://github.com/kpcyrd/rocketchat-hooks"
