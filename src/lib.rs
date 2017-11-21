@@ -3,19 +3,42 @@ extern crate hyper_rustls;
 extern crate futures;
 extern crate tokio_core;
 
+#[macro_use] extern crate error_chain;
+
 extern crate serde;
 extern crate serde_json;
 #[macro_use] extern crate serde_derive;
 
 mod client;
-mod error;
 mod structs;
 
-pub use error::Error;
 pub use structs::Message;
 pub use client::Client;
 
-pub fn post(url: &str, username: &str, icon_emoji: &str, text: &str) -> Result<(), error::Error> {
+mod errors {
+    use serde_json;
+    use std::io;
+    use hyper;
+
+    error_chain! {
+        errors {
+            Status(t: hyper::StatusCode) {
+                description("invalid status code")
+                display("server sent status code: '{}'", t)
+            }
+        }
+
+        foreign_links {
+            Io(io::Error);
+            Uri(hyper::error::UriError);
+            Http(hyper::error::Error);
+            Json(serde_json::Error);
+        }
+    }
+}
+pub use errors::*;
+
+pub fn post(url: &str, username: &str, icon_emoji: &str, text: &str) -> Result<()> {
     let client = Client::new(url)?;
     let msg = Message::new()
                 .with_username(username.to_owned())

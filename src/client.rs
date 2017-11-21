@@ -1,13 +1,14 @@
 use std::str::FromStr;
 
-use tokio_core;
+use tokio_core::reactor;
 use futures::Future;
 use hyper::{self, Request, Method, Uri};
 use hyper_rustls;
 use serde_json;
 
-use Error;
 use Message;
+
+use ::errors::*;
 
 
 #[derive(Debug, Clone)]
@@ -16,14 +17,14 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn new(url: &str) -> Result<Client, Error> {
+    pub fn new(url: &str) -> Result<Client> {
         Ok(Client {
             uri: Uri::from_str(url)?,
         })
     }
 
-    pub fn post(&self, msg: Message) -> Result<(), Error> {
-        let mut core = tokio_core::reactor::Core::new()?;
+    pub fn post(&self, msg: Message) -> Result<()> {
+        let mut core = reactor::Core::new()?;
         let handle = core.handle();
 
         let client = hyper::Client::configure()
@@ -38,7 +39,7 @@ impl Client {
             if res.status().is_success() {
                 Ok(())
             } else {
-                Err(Error::Status(res.status()))
+                Err(Error::from(ErrorKind::Status(res.status())))
             }
         });
 
